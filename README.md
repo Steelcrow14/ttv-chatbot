@@ -62,3 +62,7 @@ At the time of typing this document (2023-09-11), functionality of the bot is as
 6) Dark/Light theme depends only on your operating system's setting (I don't know if that's true for Mac or Linux, though).
 
 7) Hardly any ARIA support (which means little to no accessibility).
+
+## 2023-09-13 Fixes
+
+1) Fixed Major Problem #2: now there's a small API route that serves audio files on demand, so no more downloading all the 100500 files at once each time you log in or refresh. Playback will start immediately now, too, since Howler.js will now work with audio streams instead of gigantic base64-encoded strings.
