@@ -2,12 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { appAuthOptions } from '../auth/[...nextauth]/route';
-import { ApiResponseUploads, UserFileWithURLdata } from '@/interfaces';
-import { mkdir, readFile, stat, writeFile, unlink } from 'fs/promises';
-import path, { join } from 'path';
+import { ApiResponseUploads } from '@/interfaces';
+import { mkdir, stat, writeFile, unlink } from 'fs/promises';
+import { join } from 'path';
 import mime from 'mime';
-import { Prisma, UserFile } from '@prisma/client';
-import { getBatches } from './helpers/uploads';
+import { Prisma } from '@prisma/client';
 import { format } from 'date-fns';
 
 export async function GET(): Promise<NextResponse> {
@@ -29,49 +28,11 @@ export async function GET(): Promise<NextResponse> {
 			},
 		});
 
-		const relativeUploadDir = `/uploads/${session.user.email}`;
-		const uploadDir = join(process.cwd(), 'public', relativeUploadDir);
-
-		const batches = getBatches(userFiles as UserFileWithURLdata[], 3);
-
-		const data: UserFileWithURLdata[] = [];
-		for (const batch of batches) {
-			const processedBatch = await Promise.all(
-				batch.map(
-					async (
-						userFile: UserFile
-					): Promise<UserFileWithURLdata> => {
-						const { file: filename } = userFile;
-						const pathToFile = `${uploadDir}/${filename}`;
-						try {
-							await stat(pathToFile);
-							const base64string = await readFile(
-								pathToFile,
-								'base64'
-							);
-							return {
-								...userFile,
-								urlData: `data:${mime.getType(
-									path.extname(pathToFile)
-								)};base64,${base64string}`,
-							};
-						} catch (e: any) {
-							return {
-								...userFile,
-								urlData: '',
-							};
-						}
-					}
-				)
-			);
-			data.push(...processedBatch);
-		}
-
 		responseBody = {
 			code: 200,
 			error: false,
 			message: 'Список файлов успешно обновлен.',
-			data: data,
+			data: userFiles,
 		};
 	}
 	return NextResponse.json(responseBody);
@@ -154,6 +115,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 				name: cleanFilename,
 				file: filename,
 				type: 'audio',
+				format: file.type
 			};
 			const newUserFile = await prisma.userFile.create({
 				data: {
@@ -170,7 +132,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 				code: 200,
 				error: false,
 				message: `Файл ${newUserFile.name} успешно загружен.`,
-				data: [{ ...newUserFile, urlData: '' }],
+				data: [newUserFile],
 			};
 			return NextResponse.json(responseBody);
 		} catch (e) {

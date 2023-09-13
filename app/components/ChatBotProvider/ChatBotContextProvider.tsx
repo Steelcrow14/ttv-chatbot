@@ -19,11 +19,10 @@ import {
 	ApiResponseSettings,
 	ApiResponseUploads,
 	ChatMessage,
-	UserFileWithURLdata,
 } from '@/interfaces';
 import { useSession } from 'next-auth/react';
 import { initializeChatBot } from '@/app/helpers/ChatBotInitialization';
-import { ChatBotCommand, Settings } from '@prisma/client';
+import { ChatBotCommand, Settings, UserFile } from '@prisma/client';
 import axios from 'axios';
 import { AlertsContext } from '../AlertsProvider/AlertsProvider';
 import {
@@ -40,7 +39,7 @@ export interface CachedCommandAudio {
 export interface ChatBotContext {
 	chatBot?: tmi.Client;
 	messages: ChatMessage[];
-	files: UserFileWithURLdata[];
+	files: UserFile[];
 	commands: ChatBotCommand[];
 	settings?: Settings;
 	updateFiles: () => void;
@@ -84,7 +83,7 @@ export const ChatBotContextProvider = ({
 }: ChatBotContextProviderProps): JSX.Element => {
 	const { data: session } = useSession();
 	const [messages, dispatchMessages] = useReducer(MessagesReducer, []);
-	const [files, setFiles] = useState<UserFileWithURLdata[]>(initialFiles);
+	const [files, setFiles] = useState<UserFile[]>(initialFiles);
 	const [commands, dispatchCommands] = useReducer(
 		CommandsReducer,
 		initialCommands

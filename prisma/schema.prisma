@@ -70,7 +70,7 @@ enum AudioSource {
     url
 }
 
-//Type 'video' is basically a joke and is not used.
+//Type 'video' is not in use currentrly and is basically a stub for a possible future feature
 enum FileType {
     audio
     video
@@ -80,6 +80,7 @@ model UserFile {
     id     String   @id @default(cuid())
     name   String
     file   String
+    format String?  @db.VarChar(255)
     type   FileType
     user   User?    @relation(fields: [userId], references: [id])
     userId String?

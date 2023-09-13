@@ -87,10 +87,7 @@ const Command = motion(
 		const getAudioFileSelectOptions = (): Record<string, string> => {
 			const entries = audioFiles.map((userFile): [string, string] => {
 				const optionValueAsKey = userFile.name;
-				const optionName = userFile.name.concat(
-					userFile.urlData !== '' ? '' : `[файл не найден]`
-				);
-				return [optionValueAsKey, optionName];
+				return [optionValueAsKey, userFile.name];
 			});
 			const options = Object.fromEntries(entries);
 			return options;
@@ -330,9 +327,9 @@ const Command = motion(
 										'Название команды не должно превышать 255 символов.',
 								},
 								pattern: {
-									value: /^[a-zа-я]*$/,
+									value: /^[a-zа-я0-9]*$/,
 									message:
-										'Название должно состоять только из строчных букв английского или русского алфавита.',
+										'Допустимы только цифры и строчные буквы английского или русского алфавита.',
 								},
 								validate: {
 									noDuplicateNames: (
